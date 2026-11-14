@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- L-04 Jadwal Produksi -->
+    <record id="elni_schedule_view_tree" model="ir.ui.view">
+        <field name="name">elni.work.order.schedule.tree</field>
+        <field name="model">elni.work.order</field>
+        <field name="arch" type="xml">
+            <tree default_order="sequence_no, id" create="false"
+                  decoration-success="schedule_approved" decoration-danger="is_reprint">
+                <header>
+                    <button name="action_recommend_queue" type="object" string="Rekomendasikan Urutan" display="always"/>
+                    <button name="action_approve_schedule" type="object" string="Setujui Jadwal"/>
+                </header>
+                <field name="sequence_no"/>
+                <field name="name"/>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="deadline"/>
+                <field name="location_id"/>
+                <field name="planned_start"/>
+                <field name="is_reprint"/>
+                <field name="schedule_approved"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- L-05 Work Order -->
+    <record id="elni_work_order_view_tree" model="ir.ui.view">
+        <field name="name">elni.work.order.tree</field>
+        <field name="model">elni.work.order</field>
+        <field name="arch" type="xml">
+            <tree create="false" decoration-muted="state == 'cancelled'" decoration-danger="is_reprint">
+                <field name="name"/>
+                <field name="order_id"/>
+                <field name="deadline"/>
+                <field name="location_id"/>
+                <field name="is_reprint"/>
+                <field name="cond_preview"/>
+                <field name="cond_schedule"/>
+                <field name="cond_stock"/>
+                <field name="qc_state" widget="badge"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_work_order_view_form" model="ir.ui.view">
+        <field name="name">elni.work.order.form</field>
+        <field name="model">elni.work.order</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_start" type="object" string="Start" class="btn-primary"
+                            invisible="state not in ('locked', 'ready_to_start')"/>
+                    <button name="action_done" type="object" string="Done" class="btn-primary"
+                            invisible="state != 'in_progress'"/>
+                    <button name="action_approve_schedule" type="object" string="Setujui Jadwal"
+                            invisible="state not in ('locked', 'ready_to_start', 'in_progress') or schedule_approved"/>
+                    <button name="action_cancel" type="object" string="Batalkan SPK"
+                            invisible="state not in ('locked', 'ready_to_start')" confirm="Batalkan SPK ini?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="locked,ready_to_start,in_progress,waiting_qc,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="order_id"/>
+                            <field name="partner_id"/>
+                            <field name="location_id"/>
+                            <field name="deadline"/>
+                            <field name="is_reprint"/>
+                            <field name="reprint_of_id" invisible="not is_reprint"/>
+                        </group>
+                        <group string="Syarat SPK">
+                            <field name="cond_preview" string="syaratPreview: Preview disetujui"/>
+                            <field name="cond_schedule" string="syaratJadwal: Jadwal disetujui"/>
+                            <field name="cond_stock" string="syaratStok: Stok cukup"/>
+                            <field name="missing_text" invisible="state != 'locked'" nolabel="1" colspan="2"
+                                   class="text-danger"/>
+                        </group>
+                    </group>
+                    <group invisible="state not in ('locked', 'ready_to_start')">
+                        <field name="cancel_reason" placeholder="Wajib diisi sebelum membatalkan SPK"/>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="sequence_no"/>
+                            <field name="planned_start"/>
+                            <field name="schedule_approved"/>
+                            <field name="approved_by"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="done_date"/>
+                            <field name="on_time"/>
+                            <field name="qc_state" widget="badge"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Bahan Terpakai" name="materials">
+                            <field name="material_ids" readonly="state in ('done', 'cancelled')">
+                                <tree editable="bottom" create="false" delete="false">
+                                    <field name="product_id" readonly="True"/>
+                                    <field name="qty_planned" readonly="True"/>
+                                    <field name="qty_used"/>
+                                    <field name="uom"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Quality Check" name="qc">
+                            <field name="qc_ids" readonly="True">
+                                <tree>
+                                    <field name="create_date"/>
+                                    <field name="result" widget="badge"/>
+                                    <field name="reprint_reason"/>
+                                    <field name="reprint_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="elni_work_order_view_search" model="ir.ui.view">
+        <field name="name">elni.work.order.search</field>
+        <field name="model">elni.work.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="order_id"/>
+                <filter name="filter_locked" string="Terkunci" domain="[('state', '=', 'locked')]"/>
+                <filter name="filter_progress" string="Berjalan" domain="[('state', '=', 'in_progress')]"/>
+                <filter name="filter_done" string="Selesai" domain="[('state', '=', 'done')]"/>
+                <filter name="filter_reprint" string="Cetak Ulang" domain="[('is_reprint', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_location" string="Lokasi" context="{'group_by': 'location_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="elni_work_order_action" model="ir.actions.act_window">
+        <field name="name">Work Order</field>
+        <field name="res_model">elni.work.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- L-06 Quality Check -->
+    <record id="elni_quality_view_tree" model="ir.ui.view">
+        <field name="name">elni.quality.check.tree</field>
+        <field name="model">elni.quality.check</field>
+        <field name="arch" type="xml">
+            <tree create="false" decoration-danger="result == 'fail'" decoration-success="result == 'pass'">
+                <field name="work_order_id"/>
+                <field name="order_id"/>
+                <field name="result" widget="badge"/>
+                <field name="checked_by"/>
+                <field name="checked_date"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_quality_view_form" model="ir.ui.view">
+        <field name="name">elni.quality.check.form</field>
+        <field name="model">elni.quality.check</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_pass" type="object" string="Pass" class="btn-primary"
+                            invisible="result != 'pending'"/>
+                    <button name="action_fail" type="object" string="Fail" invisible="result != 'pending'"/>
+                    <field name="result" widget="statusbar" statusbar_visible="pending,pass,fail"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="work_order_id"/>
+                            <field name="order_id"/>
+                        </group>
+                        <group string="Checklist QC">
+                            <field name="check_size" readonly="result != 'pending'"/>
+                            <field name="check_color" readonly="result != 'pending'"/>
+                            <field name="check_finishing" readonly="result != 'pending'"/>
+                            <field name="check_qty" readonly="result != 'pending'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="reprint_reason" readonly="result != 'pending'"
+                               placeholder="Wajib diisi bila QC gagal"/>
+                        <field name="reprint_id"/>
+                        <field name="checked_by"/>
+                        <field name="checked_date"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="elni_quality_view_search" model="ir.ui.view">
+        <field name="name">elni.quality.check.search</field>
+        <field name="model">elni.quality.check</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="work_order_id"/>
+                <filter name="filter_pending" string="Menunggu" domain="[('result', '=', 'pending')]"/>
+                <filter name="filter_fail" string="Gagal" domain="[('result', '=', 'fail')]"/>
+            </search>
+        </field>
+    </record>
+    <record id="elni_quality_action" model="ir.actions.act_window">
+        <field name="name">Quality Check</field>
+        <field name="res_model">elni.quality.check</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_filter_pending': 1}</field>
+    </record>
+
+    <record id="elni_schedule_action" model="ir.actions.act_window">
+        <field name="name">Jadwal Produksi</field>
+        <field name="res_model">elni.work.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', 'in', ('locked', 'in_progress'))]</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'tree', 'view_id': ref('elni_schedule_view_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('elni_work_order_view_form')})]"/>
+    </record>
+</odoo>

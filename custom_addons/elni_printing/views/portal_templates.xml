@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_elni" name="Portal: Pesanan Cetak" inherit_id="portal.portal_my_home" customize_show="True" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Pesanan Cetak</t>
+                <t t-set="url" t-value="'/my/elni-orders'"/>
+                <t t-set="placeholder_count" t-value="'elni_order_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_elni_orders" name="Portal: Daftar Pesanan">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Pesanan Cetak</t>
+            <div class="container mb-5">
+                <div class="d-flex justify-content-between align-items-center my-3">
+                    <h3>Pesanan Cetak</h3>
+                    <a href="/my/elni-orders/new" class="btn btn-primary">Buat Pesanan Baru</a>
+                </div>
+                <t t-if="not orders">
+                    <p class="alert alert-info">Belum ada pesanan.</p>
+                </t>
+                <table t-else="" class="table table-hover">
+                    <thead>
+                        <tr><th>Pesanan</th><th>Tanggal</th><th>Deadline</th><th>Preview</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="orders" t-as="o">
+                            <td><a t-attf-href="/my/elni-orders/#{o.id}"><t t-out="o.name"/></a></td>
+                            <td><span t-field="o.order_date"/></td>
+                            <td><span t-field="o.deadline"/></td>
+                            <td><span t-field="o.preview_status"/></td>
+                            <td><span t-field="o.state"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_elni_order_detail" name="Portal: Detail Pesanan">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Pesanan</t>
+            <div class="container mb-5">
+                <h3 class="my-3">Pesanan <t t-out="order.name"/></h3>
+                <div t-if="error" class="alert alert-danger" t-out="error"/>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong> <span t-field="order.state"/></p>
+                        <p><strong>Deadline:</strong> <span t-field="order.deadline"/></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Status preview:</strong> <span t-field="order.preview_status"/></p>
+                        <p><strong>Total:</strong> <span t-out="'{:,.0f}'.format(order.amount_total)"/></p>
+                    </div>
+                </div>
+                <h5>Produk</h5>
+                <table class="table">
+                    <thead><tr><th>Produk</th><th>Spesifikasi</th><th class="text-end">Jumlah</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="order.line_ids" t-as="l">
+                            <td><t t-out="l.product_id.name"/></td>
+                            <td><t t-out="l.spec"/></td>
+                            <td class="text-end"><t t-out="l.qty"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h5 class="mt-4">Preview Desain</h5>
+                <t t-if="not order.preview_ids">
+                    <p class="text-muted">Belum ada preview desain.</p>
+                </t>
+                <t t-set="latest" t-value="order.preview_ids.filtered(lambda p: p.state != 'superseded').sorted('id')[-1:]"/>
+                <div t-foreach="order.preview_ids.sorted('id', reverse=True)" t-as="p" class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <strong>Versi <t t-out="p.version"/></strong>
+                            <span t-field="p.state"/>
+                        </div>
+                        <a t-if="p.file" t-attf-href="/web/content/elni.design.preview/#{p.id}/file/#{p.filename}?download=true">
+                            <t t-out="p.filename or 'Unduh preview'"/>
+                        </a>
+                        <p t-if="p.note" class="mt-2"><em>Catatan: <t t-out="p.note"/></em></p>
+                        <div t-if="p.state == 'pending' and p == latest" class="mt-3">
+                            <form t-attf-action="/my/elni-orders/#{order.id}/preview/#{p.id}/approve" method="post" class="d-inline">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="btn btn-success">Setujui Preview</button>
+                            </form>
+                            <form t-attf-action="/my/elni-orders/#{order.id}/preview/#{p.id}/revision" method="post" class="mt-2">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <textarea name="note" class="form-control mb-2" rows="2" placeholder="Catatan revisi"/>
+                                <button type="submit" class="btn btn-outline-secondary">Minta Revisi</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <a href="/my/elni-orders" class="btn btn-link">Kembali</a>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_elni_order_new" name="Portal: Pesanan Baru">
+        <t t-call="portal.portal_layout">
+            <t t-set="additional_title">Pesanan Baru</t>
+            <div class="container mb-5">
+                <h3 class="my-3">Buat Pesanan Baru</h3>
+                <div t-if="error" class="alert alert-danger" t-out="error"/>
+                <form action="/my/elni-orders/new" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="mb-3">
+                        <label class="form-label">Produk</label>
+                        <select name="product_id" class="form-select" required="required">
+                            <option t-foreach="products" t-as="p" t-att-value="p.id"><t t-out="p.name"/></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Spesifikasi</label>
+                        <textarea name="spec" class="form-control" rows="3" t-out="post.get('spec')"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah</label>
+                        <input type="number" step="any" min="1" name="qty" class="form-control" required="required" t-att-value="post.get('qty')"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deadline</label>
+                        <input type="date" name="deadline" class="form-control" required="required" t-att-value="post.get('deadline')"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catatan</label>
+                        <textarea name="note" class="form-control" rows="2" t-out="post.get('note')"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Kirim Pesanan</button>
+                    <a href="/my/elni-orders" class="btn btn-link">Batal</a>
+                </form>
+            </div>
+        </t>
+    </template>
+</odoo>

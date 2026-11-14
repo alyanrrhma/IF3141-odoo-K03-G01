@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_elni_order" model="ir.sequence">
+        <field name="name">Pesanan ELNI</field>
+        <field name="code">elni.order</field>
+        <field name="prefix">PSN/%(year)s/</field>
+        <field name="padding">4</field>
+    </record>
+    <record id="seq_elni_work_order" model="ir.sequence">
+        <field name="name">SPK ELNI</field>
+        <field name="code">elni.work.order</field>
+        <field name="prefix">SPK/%(year)s/</field>
+        <field name="padding">4</field>
+    </record>
+    <record id="seq_elni_purchase" model="ir.sequence">
+        <field name="name">Pembelian ELNI</field>
+        <field name="code">elni.purchase</field>
+        <field name="prefix">RFQ/%(year)s/</field>
+        <field name="padding">4</field>
+    </record>
+    <record id="seq_elni_invoice" model="ir.sequence">
+        <field name="name">Invoice ELNI</field>
+        <field name="code">elni.invoice</field>
+        <field name="prefix">INV/%(year)s/</field>
+        <field name="padding">4</field>
+    </record>
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_order_ready" model="mail.template">
+        <field name="name">ELNI: Notifikasi Pesanan Siap</field>
+        <field name="model_id" ref="model_elni_order"/>
+        <field name="subject">Pesanan {{ object.name }} sudah siap</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 14px;">
+    <p>Yth. <t t-out="object.contact_name or object.partner_id.name"/>,</p>
+    <p>Pesanan Anda <strong t-out="object.name"/> telah selesai diproduksi dan lulus pemeriksaan mutu.
+       Mohon konfirmasi metode penyerahan (diambil, diantar, atau ekspedisi) kepada tim kami.</p>
+    <p>Terima kasih,<br/>PT ELNI</p>
+</div>
+        </field>
+    </record>
+</odoo>

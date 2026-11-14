@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- L-13 Dasbor KPI -->
+    <record id="elni_kpi_view_form" model="ir.ui.view">
+        <field name="name">elni.kpi.dashboard.form</field>
+        <field name="model">elni.kpi.dashboard</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="true">
+                <group>
+                    <group string="Filter">
+                        <field name="location_id" options="{'no_create': True}"/>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Ketepatan Waktu">
+                        <field name="done_count"/>
+                        <field name="on_time_count"/>
+                        <field name="on_time_rate" widget="progressbar"/>
+                    </group>
+                    <group string="Reprint">
+                        <field name="wo_count"/>
+                        <field name="reprint_count"/>
+                        <field name="reprint_rate" widget="progressbar"/>
+                    </group>
+                </group>
+                <group string="Pemakaian Bahan">
+                    <field name="material_total"/>
+                    <field name="material_html" nolabel="1" colspan="2"/>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record id="elni_kpi_action" model="ir.actions.act_window">
+        <field name="name">Dasbor KPI</field>
+        <field name="res_model">elni.kpi.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="elni_work_order_graph" model="ir.ui.view">
+        <field name="name">elni.work.order.graph</field>
+        <field name="model">elni.work.order</field>
+        <field name="arch" type="xml">
+            <graph string="SPK" type="bar">
+                <field name="location_id"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+    <record id="elni_work_order_pivot" model="ir.ui.view">
+        <field name="name">elni.work.order.pivot</field>
+        <field name="model">elni.work.order</field>
+        <field name="arch" type="xml">
+            <pivot string="SPK">
+                <field name="location_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="elni_kpi_analysis_action" model="ir.actions.act_window">
+        <field name="name">Analisis SPK</field>
+        <field name="res_model">elni.work.order</field>
+        <field name="view_mode">graph,pivot,tree</field>
+    </record>
+
+    <!-- L-14 log aktivitas dan backup -->
+    <record id="elni_audit_view_tree" model="ir.ui.view">
+        <field name="name">elni.audit.log.tree</field>
+        <field name="model">elni.audit.log</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="user_id"/>
+                <field name="record_name"/>
+                <field name="action"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_audit_view_search" model="ir.ui.view">
+        <field name="name">elni.audit.log.search</field>
+        <field name="model">elni.audit.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="record_name"/>
+                <field name="action"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_user" string="Pengguna" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="elni_audit_action" model="ir.actions.act_window">
+        <field name="name">Log Aktivitas</field>
+        <field name="res_model">elni.audit.log</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <record id="elni_backup_view_tree" model="ir.ui.view">
+        <field name="name">elni.backup.log.tree</field>
+        <field name="model">elni.backup.log</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" decoration-danger="status == 'failed'">
+                <field name="backup_date"/>
+                <field name="status"/>
+                <field name="storage"/>
+                <field name="note"/>
+                <field name="recorded_by"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_backup_action" model="ir.actions.act_window">
+        <field name="name">Status Backup</field>
+        <field name="res_model">elni.backup.log</field>
+        <field name="view_mode">tree</field>
+    </record>
+</odoo>

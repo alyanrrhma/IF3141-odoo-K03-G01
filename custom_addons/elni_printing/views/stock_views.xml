@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- L-07 Persediaan -->
+    <record id="elni_quant_view_tree" model="ir.ui.view">
+        <field name="name">elni.stock.quant.tree</field>
+        <field name="model">elni.stock.quant</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false" decoration-danger="is_low">
+                <header>
+                    <button name="action_create_rfq" type="object" string="Buat RFQ dari Stok Rendah"/>
+                </header>
+                <field name="location_id"/>
+                <field name="product_id"/>
+                <field name="qty"/>
+                <field name="uom"/>
+                <field name="min_stock"/>
+                <field name="is_low"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_quant_view_search" model="ir.ui.view">
+        <field name="name">elni.stock.quant.search</field>
+        <field name="model">elni.stock.quant</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <filter name="filter_low" string="Di Bawah Minimum" domain="[('is_low', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_location" string="Lokasi" context="{'group_by': 'location_id'}"/>
+                    <filter name="group_product" string="Bahan" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="elni_quant_action" model="ir.actions.act_window">
+        <field name="name">Stok per Lokasi</field>
+        <field name="res_model">elni.stock.quant</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'search_default_group_location': 1}</field>
+    </record>
+
+    <record id="elni_move_view_tree" model="ir.ui.view">
+        <field name="name">elni.stock.move.tree</field>
+        <field name="model">elni.stock.move</field>
+        <field name="arch" type="xml">
+            <tree edit="false" delete="false">
+                <field name="date"/>
+                <field name="move_type"/>
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <field name="dest_location_id"/>
+                <field name="qty"/>
+                <field name="uom"/>
+                <field name="ref"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_move_view_form" model="ir.ui.view">
+        <field name="name">elni.stock.move.form</field>
+        <field name="model">elni.stock.move</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="move_type" readonly="id"/>
+                            <field name="product_id" readonly="id"/>
+                            <field name="qty" readonly="id"/>
+                        </group>
+                        <group>
+                            <field name="location_id" readonly="id"/>
+                            <field name="dest_location_id" invisible="move_type != 'transfer'" readonly="id"/>
+                            <field name="ref" readonly="id"/>
+                            <field name="note" readonly="id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="elni_move_action" model="ir.actions.act_window">
+        <field name="name">Bahan Masuk &amp; Transfer</field>
+        <field name="res_model">elni.stock.move</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- L-08 Pembelian, L-09 Persetujuan -->
+    <record id="elni_purchase_view_tree" model="ir.ui.view">
+        <field name="name">elni.purchase.tree</field>
+        <field name="model">elni.purchase</field>
+        <field name="arch" type="xml">
+            <tree decoration-warning="state == 'to_approve'" decoration-muted="state in ('cancelled', 'rejected')">
+                <field name="name"/>
+                <field name="supplier_id"/>
+                <field name="date"/>
+                <field name="location_id"/>
+                <field name="amount_total"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_purchase_view_form" model="ir.ui.view">
+        <field name="name">elni.purchase.form</field>
+        <field name="model">elni.purchase</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_send" type="object" string="Send by Email" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_confirm" type="object" string="Konfirmasi Penawaran" class="btn-primary"
+                            invisible="state != 'sent'"/>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            invisible="state != 'to_approve'"/>
+                    <button name="action_reject" type="object" string="Tolak" invisible="state != 'to_approve'"/>
+                    <button name="action_receive" type="object" string="Terima Barang" class="btn-primary"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" type="object" string="Batalkan"
+                            invisible="state not in ('draft', 'sent', 'to_approve')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,sent,to_approve,confirmed,received"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="supplier_id" readonly="state != 'draft'"/>
+                            <field name="location_id" readonly="state not in ('draft', 'sent')"/>
+                            <field name="date"/>
+                            <field name="supplier_ref" readonly="state not in ('draft', 'sent')"/>
+                        </group>
+                        <group>
+                            <field name="amount_total"/>
+                            <field name="needs_approval"/>
+                            <field name="approver_id"/>
+                            <field name="approval_date"/>
+                            <field name="exported"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Bahan">
+                            <field name="line_ids" readonly="state not in ('draft', 'sent')">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="qty"/>
+                                    <field name="uom"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Penolakan" invisible="state not in ('to_approve', 'rejected')">
+                            <field name="reject_reason" readonly="state == 'rejected'"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="elni_purchase_view_search" model="ir.ui.view">
+        <field name="name">elni.purchase.search</field>
+        <field name="model">elni.purchase</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="supplier_id"/>
+                <filter name="filter_to_approve" string="To Approve" domain="[('state', '=', 'to_approve')]"/>
+                <filter name="filter_not_exported" string="Belum Diekspor"
+                        domain="[('exported', '=', False), ('state', 'in', ('confirmed', 'received'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="elni_purchase_action" model="ir.actions.act_window">
+        <field name="name">RFQ &amp; Pembelian</field>
+        <field name="res_model">elni.purchase</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="elni_purchase_approval_action" model="ir.actions.act_window">
+        <field name="name">Persetujuan Pembelian</field>
+        <field name="res_model">elni.purchase</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_filter_to_approve': 1}</field>
+    </record>
+
+    <!-- L-10 Penyerahan -->
+    <record id="elni_delivery_view_tree" model="ir.ui.view">
+        <field name="name">elni.delivery.tree</field>
+        <field name="model">elni.delivery</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="method"/>
+                <field name="tracking_ref"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_delivery_view_form" model="ir.ui.view">
+        <field name="name">elni.delivery.form</field>
+        <field name="model">elni.delivery</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_dispatch" type="object" string="Kirim"
+                            invisible="state != 'draft' or method == 'pickup'"/>
+                    <button name="action_confirm_received" type="object" string="Konfirmasi Diterima" class="btn-primary"
+                            invisible="state == 'received' or (method != 'pickup' and state != 'shipped')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,shipped,received"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="order_id" readonly="id"/>
+                            <field name="partner_id"/>
+                            <field name="method" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="address" invisible="method == 'pickup'" readonly="state == 'received'"/>
+                            <field name="tracking_ref" invisible="method != 'courier'" readonly="state == 'received'"/>
+                            <field name="received_date"/>
+                            <field name="note"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="elni_delivery_action" model="ir.actions.act_window">
+        <field name="name">Penyerahan</field>
+        <field name="res_model">elni.delivery</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

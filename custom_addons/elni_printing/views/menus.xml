@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_elni_root" name="PT ELNI" groups="group_elni_user" sequence="100"/>
+
+    <menuitem id="menu_elni_sales" name="Penjualan" parent="menu_elni_root" sequence="10"/>
+    <menuitem id="menu_elni_order" name="Pesanan" parent="menu_elni_sales" action="elni_order_action" sequence="10"/>
+    <menuitem id="menu_elni_preview" name="Preview Desain" parent="menu_elni_sales" action="elni_preview_action" sequence="20"/>
+    <menuitem id="menu_elni_ready" name="Notifikasi Pesanan Siap" parent="menu_elni_sales" action="elni_order_ready_action" sequence="30"/>
+    <menuitem id="menu_elni_delivery" name="Penyerahan" parent="menu_elni_sales" action="elni_delivery_action" sequence="40"
+              groups="group_elni_sales,group_elni_logistik,group_elni_management,group_elni_finance_ar,group_elni_accounting"/>
+
+    <menuitem id="menu_elni_production" name="Produksi" parent="menu_elni_root" sequence="20"/>
+    <menuitem id="menu_elni_schedule" name="Jadwal Produksi" parent="menu_elni_production" action="elni_schedule_action" sequence="10"/>
+    <menuitem id="menu_elni_work_order" name="Work Order" parent="menu_elni_production" action="elni_work_order_action" sequence="20"/>
+    <menuitem id="menu_elni_quality" name="Quality Check" parent="menu_elni_production" action="elni_quality_action" sequence="30"/>
+
+    <menuitem id="menu_elni_inventory" name="Persediaan" parent="menu_elni_root" sequence="30"/>
+    <menuitem id="menu_elni_quant" name="Stok per Lokasi" parent="menu_elni_inventory" action="elni_quant_action" sequence="10"/>
+    <menuitem id="menu_elni_move" name="Bahan Masuk &amp; Transfer" parent="menu_elni_inventory" action="elni_move_action" sequence="20"/>
+
+    <menuitem id="menu_elni_purchase" name="Pembelian" parent="menu_elni_root" sequence="40"
+              groups="group_elni_logistik,group_elni_finance_manager,group_elni_accounting,group_elni_management"/>
+    <menuitem id="menu_elni_rfq" name="RFQ &amp; Pembelian" parent="menu_elni_purchase" action="elni_purchase_action" sequence="10"/>
+    <menuitem id="menu_elni_approval" name="Persetujuan Pembelian" parent="menu_elni_purchase" action="elni_purchase_approval_action" sequence="20"
+              groups="group_elni_finance_manager,group_elni_management"/>
+
+    <menuitem id="menu_elni_finance" name="Keuangan" parent="menu_elni_root" sequence="50"
+              groups="group_elni_finance_ar,group_elni_finance_manager,group_elni_accounting,group_elni_management"/>
+    <menuitem id="menu_elni_invoice" name="Piutang" parent="menu_elni_finance" action="elni_invoice_action" sequence="10"/>
+    <menuitem id="menu_elni_export" name="Ekspor Accurate" parent="menu_elni_finance" action="elni_export_wizard_action" sequence="20"
+              groups="group_elni_accounting"/>
+    <menuitem id="menu_elni_import" name="Impor Saldo Awal" parent="menu_elni_finance" action="elni_import_opening_action" sequence="30"
+              groups="group_elni_accounting"/>
+
+    <menuitem id="menu_elni_report" name="Laporan" parent="menu_elni_root" sequence="60"
+              groups="group_elni_management"/>
+    <menuitem id="menu_elni_kpi" name="Dasbor KPI" parent="menu_elni_report" action="elni_kpi_action" sequence="10"/>
+    <menuitem id="menu_elni_kpi_analysis" name="Analisis SPK" parent="menu_elni_report" action="elni_kpi_analysis_action" sequence="20"/>
+
+    <menuitem id="menu_elni_config" name="Konfigurasi" parent="menu_elni_root" sequence="90"
+              groups="group_elni_it,group_elni_management"/>
+    <menuitem id="menu_elni_users" name="Pengguna" parent="menu_elni_config" action="base.action_res_users" sequence="10"
+              groups="group_elni_it"/>
+    <menuitem id="menu_elni_groups" name="Hak Akses (Groups)" parent="menu_elni_config" action="base.action_res_groups" sequence="20"
+              groups="group_elni_it"/>
+    <menuitem id="menu_elni_audit" name="Log Aktivitas" parent="menu_elni_config" action="elni_audit_action" sequence="30"/>
+    <menuitem id="menu_elni_backup" name="Status Backup" parent="menu_elni_config" action="elni_backup_action" sequence="40"/>
+    <menuitem id="menu_elni_product" name="Produk &amp; Bahan" parent="menu_elni_config" action="elni_product_action" sequence="50"/>
+    <menuitem id="menu_elni_location" name="Lokasi / Cabang" parent="menu_elni_config" action="elni_location_action" sequence="60"/>
+    <menuitem id="menu_elni_setting" name="Pengaturan" parent="menu_elni_config" action="elni_setting_action" sequence="70"/>
+</odoo>

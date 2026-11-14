@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- L-12 Piutang -->
+    <record id="elni_invoice_view_tree" model="ir.ui.view">
+        <field name="name">elni.invoice.tree</field>
+        <field name="model">elni.invoice</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="days_overdue &gt; 0" decoration-success="state == 'paid'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="invoice_date"/>
+                <field name="due_date"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="days_overdue"/>
+                <field name="exported" optional="hide"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_invoice_view_form" model="ir.ui.view">
+        <field name="name">elni.invoice.form</field>
+        <field name="model">elni.invoice</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_register_payment" type="object" string="Register Payment" class="btn-primary"
+                            invisible="state == 'paid'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="unpaid,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="id"/>
+                            <field name="order_id" readonly="id"/>
+                            <field name="amount_total" readonly="id"/>
+                            <field name="is_opening"/>
+                        </group>
+                        <group>
+                            <field name="invoice_date" readonly="id"/>
+                            <field name="due_date" readonly="state == 'paid'"/>
+                            <field name="days_overdue"/>
+                            <field name="payment_date" readonly="state == 'paid'"/>
+                            <field name="payment_ref" readonly="state == 'paid'"/>
+                            <field name="exported"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="elni_invoice_view_search" model="ir.ui.view">
+        <field name="name">elni.invoice.search</field>
+        <field name="model">elni.invoice</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter name="filter_unpaid" string="Not Paid" domain="[('state', '=', 'unpaid')]"/>
+                <filter name="filter_paid" string="Paid" domain="[('state', '=', 'paid')]"/>
+                <filter name="filter_overdue" string="Jatuh Tempo"
+                        domain="[('state', '=', 'unpaid'), ('due_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_not_exported" string="Belum Diekspor" domain="[('exported', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_partner" string="Pelanggan" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="elni_invoice_action" model="ir.actions.act_window">
+        <field name="name">Piutang</field>
+        <field name="res_model">elni.invoice</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_filter_unpaid': 1}</field>
+    </record>
+
+    <!-- L-15 Ekspor / Impor Accurate -->
+    <record id="elni_export_wizard_view_form" model="ir.ui.view">
+        <field name="name">elni.export.wizard.form</field>
+        <field name="model">elni.export.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="export_type" readonly="file"/>
+                        <field name="only_new" readonly="file"/>
+                    </group>
+                    <group>
+                        <field name="date_from" readonly="file"/>
+                        <field name="date_to" readonly="file"/>
+                    </group>
+                </group>
+                <group invisible="not file">
+                    <field name="record_count"/>
+                    <field name="file" filename="filename"/>
+                    <field name="filename" invisible="True"/>
+                </group>
+                <footer>
+                    <button name="action_export" type="object" string="Export" class="btn-primary" invisible="file"/>
+                    <button string="Tutup" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="elni_export_wizard_action" model="ir.actions.act_window">
+        <field name="name">Ekspor Accurate</field>
+        <field name="res_model">elni.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="elni_import_opening_view_form" model="ir.ui.view">
+        <field name="name">elni.import.opening.wizard.form</field>
+        <field name="model">elni.import.opening.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="text-muted">
+                    CSV dengan kolom: pelanggan, tanggal, jatuh_tempo, jumlah (tanggal YYYY-MM-DD).
+                </p>
+                <group>
+                    <field name="file" filename="filename" readonly="result"/>
+                    <field name="filename" invisible="True"/>
+                    <field name="result" invisible="not result"/>
+                </group>
+                <footer>
+                    <button name="action_import" type="object" string="Import" class="btn-primary" invisible="result"/>
+                    <button string="Tutup" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="elni_import_opening_action" model="ir.actions.act_window">
+        <field name="name">Impor Saldo Awal</field>
+        <field name="res_model">elni.import.opening.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

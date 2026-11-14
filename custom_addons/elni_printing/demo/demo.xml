@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Data contoh. Akun demo berpassword "demo" HANYA untuk database lokal/demo. -->
+    <record id="demo_customer" model="res.partner">
+        <field name="name">PT Maju Jaya (Demo B2B)</field>
+        <field name="email">purchasing@majujaya.example</field>
+        <field name="is_company" eval="True"/>
+    </record>
+    <record id="demo_supplier" model="res.partner">
+        <field name="name">CV Kertas Nusantara (Demo Supplier)</field>
+        <field name="email">sales@kertas.example</field>
+        <field name="is_company" eval="True"/>
+    </record>
+
+    <record id="demo_user_sales" model="res.users">
+        <field name="name">Demo Sales</field>
+        <field name="login">sales@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_sales')])]"/>
+    </record>
+    <record id="demo_user_designer" model="res.users">
+        <field name="name">Demo Designer</field>
+        <field name="login">designer@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_designer')])]"/>
+    </record>
+    <record id="demo_user_operator" model="res.users">
+        <field name="name">Demo Operator</field>
+        <field name="login">operator@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_operator')])]"/>
+    </record>
+    <record id="demo_user_qa" model="res.users">
+        <field name="name">Demo QA</field>
+        <field name="login">qa@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_qa')])]"/>
+    </record>
+    <record id="demo_user_logistik" model="res.users">
+        <field name="name">Demo Logistik</field>
+        <field name="login">logistik@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_logistik')])]"/>
+    </record>
+    <record id="demo_user_fm" model="res.users">
+        <field name="name">Demo Manager Keuangan</field>
+        <field name="login">fm@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_finance_manager')])]"/>
+    </record>
+    <record id="demo_user_ar" model="res.users">
+        <field name="name">Demo A/R Staff</field>
+        <field name="login">ar@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_finance_ar')])]"/>
+    </record>
+    <record id="demo_user_accounting" model="res.users">
+        <field name="name">Demo Chief Akunting</field>
+        <field name="login">akunting@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_accounting')])]"/>
+    </record>
+    <record id="demo_user_management" model="res.users">
+        <field name="name">Demo Manajemen</field>
+        <field name="login">manajemen@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_management')])]"/>
+    </record>
+    <record id="demo_user_it" model="res.users">
+        <field name="name">Demo IT</field>
+        <field name="login">it@elni.test</field>
+        <field name="password">demo</field>
+        <field name="groups_id" eval="[(6, 0, [ref('group_elni_it')])]"/>
+    </record>
+    <record id="demo_user_portal" model="res.users">
+        <field name="name">Demo Pelanggan B2B</field>
+        <field name="login">pelanggan@elni.test</field>
+        <field name="password">demo</field>
+        <field name="partner_id" ref="demo_customer"/>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_portal')])]"/>
+    </record>
+
+    <!-- Stok awal: Pasteur cukup, Cimahi sengaja di bawah minimum -->
+    <record id="demo_move_paper_pst" model="elni.stock.move">
+        <field name="move_type">receipt</field>
+        <field name="product_id" ref="mat_art_paper"/>
+        <field name="location_id" ref="loc_pasteur"/>
+        <field name="qty">3000</field>
+        <field name="ref">Stok awal</field>
+    </record>
+    <record id="demo_move_ink_pst" model="elni.stock.move">
+        <field name="move_type">receipt</field>
+        <field name="product_id" ref="mat_ink"/>
+        <field name="location_id" ref="loc_pasteur"/>
+        <field name="qty">20</field>
+        <field name="ref">Stok awal</field>
+    </record>
+    <record id="demo_move_paper_cmh" model="elni.stock.move">
+        <field name="move_type">receipt</field>
+        <field name="product_id" ref="mat_art_paper"/>
+        <field name="location_id" ref="loc_cimahi"/>
+        <field name="qty">200</field>
+        <field name="ref">Stok awal</field>
+    </record>
+
+    <!-- Satu pesanan yang dipakai untuk semua screenshot -->
+    <record id="demo_order_1" model="elni.order">
+        <field name="partner_id" ref="demo_customer"/>
+        <field name="contact_name">Budi Santoso</field>
+        <field name="contact_phone">081234567890</field>
+        <field name="location_id" ref="loc_pasteur"/>
+        <field name="deadline" eval="(DateTime.today() + timedelta(days=7)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_order_1_line" model="elni.order.line">
+        <field name="order_id" ref="demo_order_1"/>
+        <field name="product_id" ref="prd_brosur"/>
+        <field name="spec">A4, art paper 150gsm, full color dua sisi</field>
+        <field name="qty">1000</field>
+        <field name="price_unit">3500</field>
+    </record>
+    <function model="elni.order" name="action_demo_confirm_if_draft" eval="[[ref('demo_order_1')]]"/>
+
+    <record id="demo_preview_1" model="elni.design.preview">
+        <field name="order_id" ref="demo_order_1"/>
+        <field name="filename">preview_v1.png</field>
+        <field name="file">iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==</field>
+    </record>
+
+    <!-- Pesanan kedua masih draft -->
+    <record id="demo_order_2" model="elni.order">
+        <field name="partner_id" ref="demo_customer"/>
+        <field name="location_id" ref="loc_pasteur"/>
+        <field name="deadline" eval="(DateTime.today() + timedelta(days=14)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_order_2_line" model="elni.order.line">
+        <field name="order_id" ref="demo_order_2"/>
+        <field name="product_id" ref="prd_kartu_nama"/>
+        <field name="qty">20</field>
+        <field name="price_unit">45000</field>
+    </record>
+
+    <!-- SPK demo siap QC agar pengujian QC tidak bergantung pada alur persetujuan desain/jadwal. -->
+    <record id="demo_order_qc_pass" model="elni.order">
+        <field name="partner_id" ref="demo_customer"/>
+        <field name="contact_name">Budi Santoso</field>
+        <field name="contact_phone">081234567890</field>
+        <field name="location_id" ref="loc_pasteur"/>
+        <field name="deadline" eval="(DateTime.today() + timedelta(days=3)).strftime('%Y-%m-%d')"/>
+        <field name="note">[QC-DEMO:PASS]</field>
+        <field name="state">in_production</field>
+    </record>
+    <record id="demo_order_qc_pass_line" model="elni.order.line">
+        <field name="order_id" ref="demo_order_qc_pass"/>
+        <field name="product_id" ref="prd_brosur"/>
+        <field name="spec">Demo QC lolos</field>
+        <field name="qty">10</field>
+        <field name="price_unit">3500</field>
+    </record>
+    <record id="demo_preview_qc_pass" model="elni.design.preview">
+        <field name="order_id" ref="demo_order_qc_pass"/>
+        <field name="filename">preview_qc_pass.png</field>
+        <field name="file">iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==</field>
+        <field name="state">approved</field>
+        <field name="decided_by">Demo Pelanggan B2B</field>
+        <field name="decided_date" eval="DateTime.now()"/>
+    </record>
+    <record id="demo_work_order_qc_pass" model="elni.work.order">
+        <field name="order_id" ref="demo_order_qc_pass"/>
+        <field name="state">waiting_qc</field>
+        <field name="schedule_approved" eval="True"/>
+        <field name="planned_start" eval="Date.today()"/>
+        <field name="start_date" eval="DateTime.now()"/>
+        <field name="done_date" eval="DateTime.now()"/>
+        <field name="qc_state">pending</field>
+    </record>
+    <record id="demo_quality_check_pass" model="elni.quality.check">
+        <field name="work_order_id" ref="demo_work_order_qc_pass"/>
+        <field name="result">pending</field>
+        <field name="check_size" eval="True"/>
+        <field name="check_color" eval="True"/>
+        <field name="check_finishing" eval="True"/>
+        <field name="check_qty" eval="True"/>
+        <field name="checked_by" eval="False"/>
+        <field name="checked_date" eval="False"/>
+        <field name="reprint_id" eval="False"/>
+    </record>
+
+    <record id="demo_order_qc_fail" model="elni.order">
+        <field name="partner_id" ref="demo_customer"/>
+        <field name="contact_name">Budi Santoso</field>
+        <field name="contact_phone">081234567890</field>
+        <field name="location_id" ref="loc_pasteur"/>
+        <field name="deadline" eval="(DateTime.today() + timedelta(days=3)).strftime('%Y-%m-%d')"/>
+        <field name="note">[QC-DEMO:FAIL]</field>
+        <field name="state">in_production</field>
+    </record>
+    <record id="demo_order_qc_fail_line" model="elni.order.line">
+        <field name="order_id" ref="demo_order_qc_fail"/>
+        <field name="product_id" ref="prd_brosur"/>
+        <field name="spec">Demo QC cetak ulang</field>
+        <field name="qty">10</field>
+        <field name="price_unit">3500</field>
+    </record>
+    <record id="demo_preview_qc_fail" model="elni.design.preview">
+        <field name="order_id" ref="demo_order_qc_fail"/>
+        <field name="filename">preview_qc_fail.png</field>
+        <field name="file">iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==</field>
+        <field name="state">approved</field>
+        <field name="decided_by">Demo Pelanggan B2B</field>
+        <field name="decided_date" eval="DateTime.now()"/>
+    </record>
+    <record id="demo_work_order_qc_fail" model="elni.work.order">
+        <field name="order_id" ref="demo_order_qc_fail"/>
+        <field name="state">waiting_qc</field>
+        <field name="schedule_approved" eval="True"/>
+        <field name="planned_start" eval="Date.today()"/>
+        <field name="start_date" eval="DateTime.now()"/>
+        <field name="done_date" eval="DateTime.now()"/>
+        <field name="qc_state">pending</field>
+    </record>
+    <record id="demo_quality_check_fail" model="elni.quality.check">
+        <field name="work_order_id" ref="demo_work_order_qc_fail"/>
+        <field name="result">pending</field>
+        <field name="check_size" eval="True"/>
+        <field name="check_color" eval="True"/>
+        <field name="check_finishing" eval="True"/>
+        <field name="check_qty" eval="False"/>
+        <field name="reprint_reason">Jumlah cetak tidak sesuai</field>
+        <field name="checked_by" eval="False"/>
+        <field name="checked_date" eval="False"/>
+        <field name="reprint_id" eval="False"/>
+    </record>
+
+    <!-- RFQ di atas batas persetujuan (5 juta) untuk layar Persetujuan Pembelian -->
+    <record id="demo_rfq_1" model="elni.purchase">
+        <field name="supplier_id" ref="demo_supplier"/>
+        <field name="location_id" ref="loc_cimahi"/>
+    </record>
+    <record id="demo_rfq_1_line" model="elni.purchase.line">
+        <field name="purchase_id" ref="demo_rfq_1"/>
+        <field name="product_id" ref="mat_art_paper"/>
+        <field name="qty">5000</field>
+        <field name="price_unit">1500</field>
+    </record>
+    <function model="elni.purchase" name="action_demo_send_if_draft" eval="[[ref('demo_rfq_1')]]"/>
+    <function model="elni.purchase" name="action_demo_confirm_if_sent" eval="[[ref('demo_rfq_1')]]"/>
+</odoo>

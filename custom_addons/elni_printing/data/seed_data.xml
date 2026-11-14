@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="setting_default" model="elni.setting">
+        <field name="name">Pengaturan ELNI</field>
+        <field name="po_approval_limit">5000000</field>
+        <field name="payment_term_days">30</field>
+        <field name="daily_capacity">5</field>
+    </record>
+
+    <record id="loc_pasteur" model="elni.location">
+        <field name="name">Pasteur</field>
+        <field name="code">PST</field>
+    </record>
+    <record id="loc_cimahi" model="elni.location">
+        <field name="name">Cimahi</field>
+        <field name="code">CMH</field>
+    </record>
+    <record id="loc_bojongsoang" model="elni.location">
+        <field name="name">Bojongsoang</field>
+        <field name="code">BJS</field>
+    </record>
+
+    <!-- Bahan baku -->
+    <record id="mat_art_paper" model="elni.product">
+        <field name="name">Art Paper 150gsm</field>
+        <field name="kind">material</field>
+        <field name="uom">lembar</field>
+        <field name="cost">1500</field>
+        <field name="min_stock">500</field>
+    </record>
+    <record id="mat_ink" model="elni.product">
+        <field name="name">Tinta Offset CMYK</field>
+        <field name="kind">material</field>
+        <field name="uom">kg</field>
+        <field name="cost">250000</field>
+        <field name="min_stock">5</field>
+    </record>
+    <!-- Produk cetak + kebutuhan bahan per unit -->
+    <record id="prd_brosur" model="elni.product">
+        <field name="name">Brosur A4 Full Color</field>
+        <field name="kind">print</field>
+        <field name="price">3500</field>
+    </record>
+    <record id="prd_kartu_nama" model="elni.product">
+        <field name="name">Kartu Nama</field>
+        <field name="kind">print</field>
+        <field name="uom">box</field>
+        <field name="price">45000</field>
+    </record>
+    <record id="bom_brosur_paper" model="elni.product.bom">
+        <field name="product_id" ref="prd_brosur"/>
+        <field name="material_id" ref="mat_art_paper"/>
+        <field name="qty_per_unit">1</field>
+    </record>
+    <record id="bom_brosur_ink" model="elni.product.bom">
+        <field name="product_id" ref="prd_brosur"/>
+        <field name="material_id" ref="mat_ink"/>
+        <field name="qty_per_unit">0.002</field>
+    </record>
+    <record id="bom_kartu_paper" model="elni.product.bom">
+        <field name="product_id" ref="prd_kartu_nama"/>
+        <field name="material_id" ref="mat_art_paper"/>
+        <field name="qty_per_unit">10</field>
+    </record>
+</odoo>

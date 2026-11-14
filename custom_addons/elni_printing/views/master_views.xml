@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Lokasi -->
+    <record id="elni_location_view_tree" model="ir.ui.view">
+        <field name="name">elni.location.tree</field>
+        <field name="model">elni.location</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="address"/>
+                <field name="active" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_location_action" model="ir.actions.act_window">
+        <field name="name">Lokasi / Cabang</field>
+        <field name="res_model">elni.location</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <!-- Produk -->
+    <record id="elni_product_view_tree" model="ir.ui.view">
+        <field name="name">elni.product.tree</field>
+        <field name="model">elni.product</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="kind"/>
+                <field name="uom"/>
+                <field name="price"/>
+                <field name="cost"/>
+                <field name="min_stock"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_product_view_form" model="ir.ui.view">
+        <field name="name">elni.product.form</field>
+        <field name="model">elni.product</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="kind"/>
+                            <field name="uom"/>
+                        </group>
+                        <group>
+                            <field name="price" invisible="kind != 'print'"/>
+                            <field name="cost" invisible="kind != 'material'"/>
+                            <field name="min_stock" invisible="kind != 'material'"/>
+                            <field name="supplier_id" invisible="kind != 'material'"/>
+                            <field name="total_stock" invisible="kind != 'material'"/>
+                        </group>
+                    </group>
+                    <notebook invisible="kind != 'print'">
+                        <page string="Kebutuhan Bahan per Unit">
+                            <field name="bom_ids">
+                                <tree editable="bottom">
+                                    <field name="material_id"/>
+                                    <field name="qty_per_unit"/>
+                                    <field name="uom"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="elni_product_view_search" model="ir.ui.view">
+        <field name="name">elni.product.search</field>
+        <field name="model">elni.product</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter name="filter_print" string="Produk Cetak" domain="[('kind', '=', 'print')]"/>
+                <filter name="filter_material" string="Bahan Baku" domain="[('kind', '=', 'material')]"/>
+            </search>
+        </field>
+    </record>
+    <record id="elni_product_action" model="ir.actions.act_window">
+        <field name="name">Produk &amp; Bahan</field>
+        <field name="res_model">elni.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Pengaturan -->
+    <record id="elni_setting_view_form" model="ir.ui.view">
+        <field name="name">elni.setting.form</field>
+        <field name="model">elni.setting</field>
+        <field name="arch" type="xml">
+            <form create="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="po_approval_limit"/>
+                        <field name="payment_term_days"/>
+                        <field name="daily_capacity"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="elni_setting_action" model="ir.actions.act_window">
+        <field name="name">Pengaturan ELNI</field>
+        <field name="res_model">elni.setting</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="setting_default"/>
+    </record>
+</odoo>

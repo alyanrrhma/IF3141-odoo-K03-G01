@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- L-01 Form Pesanan, L-02 Preview Desain (tab), L-11 Notifikasi (tab) -->
+    <record id="elni_order_view_tree" model="ir.ui.view">
+        <field name="name">elni.order.tree</field>
+        <field name="model">elni.order</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="state == 'cancelled'" decoration-success="state == 'ready'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="deadline"/>
+                <field name="location_id"/>
+                <field name="amount_total"/>
+                <field name="preview_status" widget="badge"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="elni_order_view_form" model="ir.ui.view">
+        <field name="name">elni.order.form</field>
+        <field name="model">elni.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_cancel" type="object" string="Batalkan"
+                            invisible="state not in ('draft', 'confirmed')"
+                            confirm="Batalkan pesanan ini?"/>
+                    <button name="action_resend_ready_notification" type="object" string="Buat Ulang Notifikasi"
+                            invisible="state != 'ready'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,in_production,ready,delivered"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_workorders" type="object" class="oe_stat_button"
+                                icon="fa-cogs" invisible="workorder_count == 0">
+                            <field name="workorder_count" widget="statinfo" string="SPK"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="contact_name" readonly="state != 'draft'"/>
+                            <field name="contact_phone" readonly="state != 'draft'"/>
+                            <field name="location_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="order_date" readonly="state != 'draft'"/>
+                            <field name="deadline" readonly="state != 'draft'"/>
+                            <field name="source"/>
+                            <field name="preview_status" widget="badge"/>
+                            <field name="amount_total"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Produk &amp; Spesifikasi" name="lines">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="spec"/>
+                                    <field name="qty"/>
+                                    <field name="price_unit"/>
+                                    <field name="subtotal"/>
+                                </tree>
+                            </field>
+                            <field name="note" placeholder="Catatan pesanan..."/>
+                        </page>
+                        <page string="Preview Desain" name="preview">
+                            <field name="preview_ids" context="{'default_order_id': id}">
+                                <tree decoration-success="state == 'approved'" decoration-muted="state == 'superseded'">
+                                    <field name="version"/>
+                                    <field name="filename"/>
+                                    <field name="note"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="decided_by"/>
+                                </tree>
+                                <form>
+                                    <header>
+                                        <button name="action_approve" type="object" string="Setujui (atas nama pelanggan)"
+                                                invisible="state != 'pending'"/>
+                                        <button name="action_request_revision" type="object" string="Minta Revisi"
+                                                invisible="state != 'pending'"/>
+                                        <field name="state" widget="statusbar"/>
+                                    </header>
+                                    <group>
+                                        <field name="order_id" invisible="True"/>
+                                        <field name="file" filename="filename" readonly="state != 'pending'"/>
+                                        <field name="filename" invisible="True"/>
+                                        <field name="version"/>
+                                        <field name="note" placeholder="Catatan revisi"/>
+                                        <field name="decided_by"/>
+                                        <field name="decided_date"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Riwayat Revisi" name="revision_history">
+                            <field name="revision_note_ids" readonly="1">
+                                <tree create="false" delete="false">
+                                    <field name="recorded_at"/>
+                                    <field name="kind"/>
+                                    <field name="preview_id"/>
+                                    <field name="recorded_by"/>
+                                    <field name="note"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notifikasi Pesanan Siap" name="notif" invisible="state not in ('ready', 'delivered')">
+                            <group>
+                                <field name="email_sent"/>
+                                <field name="whatsapp_text"/>
+                                <field name="wa_sent"/>
+                            </group>
+                            <button name="action_mark_wa_sent" type="object" string="Tandai WhatsApp Terkirim"
+                                    class="btn-secondary" invisible="wa_sent"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="elni_order_view_search" model="ir.ui.view">
+        <field name="name">elni.order.search</field>
+        <field name="model">elni.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_active" string="Berjalan" domain="[('state', 'in', ('confirmed', 'in_production'))]"/>
+                <filter name="filter_ready" string="Siap" domain="[('state', '=', 'ready')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_partner" string="Pelanggan" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_location" string="Cabang" context="{'group_by': 'location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="elni_order_action" model="ir.actions.act_window">
+        <field name="name">Pesanan</field>
+        <field name="res_model">elni.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Catat pesanan pertama</p>
+            <p>Konfirmasi pesanan untuk membentuk SPK berstatus Terkunci.</p>
+        </field>
+    </record>
+
+    <!-- L-11 daftar pesanan siap -->
+    <record id="elni_order_ready_action" model="ir.actions.act_window">
+        <field name="name">Notifikasi Pesanan Siap</field>
+        <field name="res_model">elni.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', 'in', ('ready', 'delivered'))]</field>
+    </record>
+
+    <!-- L-02 daftar preview (Designer) -->
+    <record id="elni_preview_view_tree" model="ir.ui.view">
+        <field name="name">elni.design.preview.tree</field>
+        <field name="model">elni.design.preview</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="order_id"/>
+                <field name="version"/>
+                <field name="filename"/>
+                <field name="state" widget="badge"/>
+                <field name="uploaded_by"/>
+            </tree>
+        </field>
+    </record>
+    <record id="elni_preview_view_form" model="ir.ui.view">
+        <field name="name">elni.design.preview.form</field>
+        <field name="model">elni.design.preview</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" type="object" string="Setujui (atas nama pelanggan)"
+                            invisible="state != 'pending'"/>
+                    <button name="action_request_revision" type="object" string="Minta Revisi"
+                            invisible="state != 'pending'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,approved"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="order_id" readonly="id"/>
+                        <field name="version"/>
+                        <field name="file" filename="filename" readonly="state != 'pending'"/>
+                        <field name="filename" invisible="True"/>
+                        <field name="note" placeholder="Catatan revisi"/>
+                        <field name="decided_by"/>
+                        <field name="decided_date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="elni_preview_action" model="ir.actions.act_window">
+        <field name="name">Preview Desain</field>
+        <field name="res_model">elni.design.preview</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
